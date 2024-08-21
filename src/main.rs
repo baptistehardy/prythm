@@ -1,4 +1,3 @@
-use std::collections::HashMap;
 use std::fs::File;
 use std::io::BufReader;
 use exif::{In, Reader, Tag};
@@ -31,7 +30,16 @@ fn main() {
 
     for (tag, label) in map {
         if let Some(field) = exif.get_field(tag, In::PRIMARY) {
-            println!("{}: {}", label, field.display_value().with_unit(&exif))
+            let value: Vec<String> = field
+                .display_value()
+                .to_string()
+                .replace("\"", "")// Cleanup all the quotes
+                .split(',')
+                .map(|s| s.to_string())
+                .filter(|s| !s.is_empty())
+                .collect();
+
+            println!("{}: {}", label, value.join(""))
         }
     }
 }
