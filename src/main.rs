@@ -1,9 +1,19 @@
 use std::fs::File;
 use std::io::BufReader;
 use exif::{In, Reader, Tag};
+use clap::Parser;
+
+#[derive(Parser, Debug)]
+#[command(version, about, long_about = None)]
+struct Args {
+    #[arg(short = 'f', long, help = "Path to the file to analyze")]
+    filepath: String,
+}
 
 fn main() {
-    let file = match File::open("tests/DSCF0576.JPG") {
+    let args = Args::parse();
+
+    let file = match File::open(args.filepath) {
         Ok(file) => file,
         Err(err) => {
             eprintln!("Error opening file: {}", err);
