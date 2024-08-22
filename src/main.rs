@@ -1,6 +1,6 @@
 use std::fs::File;
 use std::io::BufReader;
-use exif::{In, Reader, Tag};
+use exif::{Field, In, Reader, Tag};
 use clap::Parser;
 
 #[derive(Parser, Debug)]
@@ -29,27 +29,44 @@ fn main() {
         }
     };
 
-    let map = vec![
+    let camera_tag_map = vec![
+        (Tag::Make, "Maker"),
+        (Tag::Model, "Model")
+    ];
+
+    let lens_tag_map = vec![
         (Tag::LensMake, "Maker"),
         (Tag::LensModel, "Model"),
         (Tag::LensSpecification, "Specs"),
         (Tag::LensSerialNumber, "Serial Number"),
     ];
 
-    println!("Lens:\n");
-
-    for (tag, label) in map {
+    println!("Camera:\n");
+    for (tag, label) in camera_tag_map {
         if let Some(field) = exif.get_field(tag, In::PRIMARY) {
-            let value: Vec<String> = field
-                .display_value()
-                .to_string()
-                .replace("\"", "")// Cleanup all the quotes
-                .split(',')
-                .map(|s| s.to_string())
-                .filter(|s| !s.is_empty())
-                .collect();
-
-            println!("{}: {}", label, value.join(""))
+            println!("{}: {}", label, format_field(field))
         }
     }
+
+    println!("\nLens:\n");
+
+    for (tag, label) in lens_tag_map {
+        if let Some(field) = exif.get_field(tag, In::PRIMARY) {
+            println!("{}: {}", label, format_field(field))
+        }
+    }
+}
+
+fn format_field(field: &Field) -> String
+{
+    let value_array: Vec<String> = field
+        .display_value()
+        .to_string()
+        .replace("\"", "")// Cleanup all the quotes
+        .split(',')
+        .map(|s| s.to_string())
+        .filter(|s| !s.is_empty())
+        .collect();
+
+    value_array.join("")
 }
